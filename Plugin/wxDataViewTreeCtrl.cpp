@@ -260,6 +260,12 @@ void wxTreeCtrlDataViewBase::OnItemExpandingInternal(wxDataViewEvent& event)
     treeEvent.SetItem(to_tree_item(event.GetItem()));
     treeEvent.SetEventObject(this);
     GetEventHandler()->ProcessEvent(treeEvent);
+
+    if (!treeEvent.IsAllowed()) {
+        event.Veto();
+    } else {
+        event.Skip();
+    }
 }
 
 void wxTreeCtrlDataViewBase::OnItemExpandedInternal(wxDataViewEvent& event)
@@ -268,6 +274,7 @@ void wxTreeCtrlDataViewBase::OnItemExpandedInternal(wxDataViewEvent& event)
     treeEvent.SetItem(to_tree_item(event.GetItem()));
     treeEvent.SetEventObject(this);
     GetEventHandler()->ProcessEvent(treeEvent);
+    event.Skip();
 }
 
 void wxTreeCtrlDataViewBase::OnItemActivatedInternal(wxDataViewEvent& event)
@@ -276,6 +283,7 @@ void wxTreeCtrlDataViewBase::OnItemActivatedInternal(wxDataViewEvent& event)
     treeEvent.SetItem(to_tree_item(event.GetItem()));
     treeEvent.SetEventObject(this);
     GetEventHandler()->ProcessEvent(treeEvent);
+    event.Skip();
 }
 
 void wxTreeCtrlDataViewBase::OnItemContextMenuInternal(wxDataViewEvent& event)
@@ -284,4 +292,5 @@ void wxTreeCtrlDataViewBase::OnItemContextMenuInternal(wxDataViewEvent& event)
     treeEvent.SetItem(to_tree_item(event.GetItem()));
     treeEvent.SetEventObject(this);
     GetEventHandler()->ProcessEvent(treeEvent);
+    event.Skip();
 }
