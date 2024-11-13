@@ -28,6 +28,7 @@
 
 #include "clThemedTreeCtrl.h"
 #include "codelite_exports.h"
+#include "wxDataViewTreeCtrl.hpp"
 #include "wxStringHash.h"
 
 #include <map>
@@ -128,7 +129,7 @@ public:
 };
 
 #include "bitmap_loader.h"
-class WXDLLIMPEXP_SDK clFileViewerTreeCtrl : public wxTreeCtrl
+class WXDLLIMPEXP_SDK clFileViewerTreeCtrl : public wxTreeCtrlDataViewBase
 {
     wxDECLARE_DYNAMIC_CLASS(clFileViewerTreeCtrl);
 
@@ -139,8 +140,7 @@ public:
                          long style = wxTR_DEFAULT_STYLE | wxTR_MULTIPLE | wxTR_HIDE_ROOT | wxBORDER_NONE);
     virtual ~clFileViewerTreeCtrl();
 
-    void SetBitmaps(BitmapLoader::Vec_t* bitmaps);
-    int OnCompareItems(const wxTreeItemId& item1, const wxTreeItemId& item2) override;
+    //void SetBitmaps(BitmapLoader::Vec_t* bitmaps);
 
 private:
     BitmapLoader::Vec_t* m_bitmaps = nullptr;

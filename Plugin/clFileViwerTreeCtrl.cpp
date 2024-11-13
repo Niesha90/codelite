@@ -4,13 +4,13 @@ wxIMPLEMENT_DYNAMIC_CLASS(clFileViewerTreeCtrl, wxTreeCtrl);
 
 // Default Ctor - required by wxIMPLEMENT_DYNAMIC_CLASS macro
 clFileViewerTreeCtrl::clFileViewerTreeCtrl()
-    : wxTreeCtrl()
+    : wxTreeCtrlDataViewBase()
 {
 }
 
 clFileViewerTreeCtrl::clFileViewerTreeCtrl(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
                                            long style)
-    : wxTreeCtrl(parent, id, pos, size, (style | wxTR_FULL_ROW_HIGHLIGHT))
+    : wxTreeCtrlDataViewBase(parent, id, pos, size, (style | wxTR_FULL_ROW_HIGHLIGHT))
 {
 #if 0
     std::function<bool(const wxTreeItemId&, const wxTreeItemId&)> SortFunc = [&](const wxTreeItemId& itemA,
@@ -30,41 +30,16 @@ clFileViewerTreeCtrl::clFileViewerTreeCtrl(wxWindow* parent, wxWindowID id, cons
 
 clFileViewerTreeCtrl::~clFileViewerTreeCtrl() {}
 
-int clFileViewerTreeCtrl::OnCompareItems(const wxTreeItemId& item1, const wxTreeItemId& item2)
-{
-    auto item1_data = GetItemData(item1);
-    auto item2_data = GetItemData(item2);
-    if (item1_data == nullptr || item2_data == nullptr) {
-        return wxTreeCtrl::OnCompareItems(item1, item2);
-    }
-
-    auto d1 = dynamic_cast<clTreeCtrlData*>(item1_data);
-    auto d2 = dynamic_cast<clTreeCtrlData*>(item2_data);
-
-    if (d1 == nullptr || d2 == nullptr) {
-        return wxTreeCtrl::OnCompareItems(item1, item2);
-    }
-
-    if (d1->IsFolder() && d2->IsFile()) {
-        return -1;
-    } else if (d2->IsFolder() && d1->IsFile()) {
-        return 1;
-    } else {
-        // of the same type
-        return wxTreeCtrl::OnCompareItems(item1, item2);
-    }
-}
-
-void clFileViewerTreeCtrl::SetBitmaps(BitmapLoader::Vec_t* bitmaps)
-{
-    // Covnert to wxVector<wxBitmapBundle>
-    wxVector<wxBitmapBundle> images;
-    images.reserve(bitmaps->size());
-
-    m_bitmaps = bitmaps;
-    images.insert(images.begin(), m_bitmaps->begin(), m_bitmaps->end());
-    SetImages(images);
-}
+//void clFileViewerTreeCtrl::SetBitmaps(BitmapLoader::Vec_t* bitmaps)
+//{
+//    // Covnert to wxVector<wxBitmapBundle>
+//    wxVector<wxBitmapBundle> images;
+//    images.reserve(bitmaps->size());
+//
+//    m_bitmaps = bitmaps;
+//    images.insert(images.begin(), m_bitmaps->begin(), m_bitmaps->end());
+//    SetImages(images);
+//}
 
 wxTreeItemId clTreeNodeIndex::Find(const wxString& path)
 {
