@@ -49,7 +49,7 @@ NodeJSWorkspaceView::~NodeJSWorkspaceView()
 void NodeJSWorkspaceView::OnContextMenu(clContextMenuEvent& event)
 {
     event.Skip();
-    if((event.GetEventObject() == this)) {
+    if ((event.GetEventObject() == this)) {
         wxMenu* menu = event.GetMenu();
 
         // Locate the "Close" menu entry
@@ -57,16 +57,16 @@ void NodeJSWorkspaceView::OnContextMenu(clContextMenuEvent& event)
         wxMenuItem* closeItem = NULL;
 
         int pos = ::clFindMenuItemPosition(menu, XRCID("tree_ctrl_close_folder"));
-        if(pos != wxNOT_FOUND) {
+        if (pos != wxNOT_FOUND) {
             closeItem = menu->FindItem(XRCID("tree_ctrl_close_folder"), NULL);
         }
         openShellPos = ::clFindMenuItemPosition(menu, XRCID("tree_ctrl_open_shell_folder"));
-        if(openShellPos != wxNOT_FOUND) {
+        if (openShellPos != wxNOT_FOUND) {
             ++openShellPos; // insert after
             ++openShellPos; // skip the separator
         }
 
-        if((pos != wxNOT_FOUND) && closeItem) {
+        if ((pos != wxNOT_FOUND) && closeItem) {
             wxMenuItem* showHiddenItem =
                 menu->Insert(pos, XRCID("nodejs_show_hidden_files"), _("Show hidden files"), "", wxITEM_CHECK);
             NodeJSWorkspaceConfiguration conf(NodeJSWorkspace::Get()->GetFilename());
@@ -87,13 +87,13 @@ void NodeJSWorkspaceView::OnContextMenu(clContextMenuEvent& event)
         wxArrayTreeItemIds folderItems, fileItems;
         GetSelections(folders, folderItems, files, fileItems);
 
-        if((openShellPos != wxNOT_FOUND) && (folderItems.size() == 1) && (fileItems.size() == 0)) {
+        if ((openShellPos != wxNOT_FOUND) && (folderItems.size() == 1) && (fileItems.size() == 0)) {
             // only a folder is selected, check to see if this is a project folder
             // we do this by testing for the existence of the file package.json
             // under the folder path
             int npmInstallPosAfter = wxNOT_FOUND;
             wxFileName packageJSON(folders.Item(0), "package.json");
-            if(packageJSON.FileExists()) {
+            if (packageJSON.FileExists()) {
                 // A project folder
                 menu->InsertSeparator(openShellPos);
                 menu->Insert(openShellPos, XRCID("nodejs_project_settings"), _("Open package.json"));
@@ -116,7 +116,7 @@ void NodeJSWorkspaceView::OnContextMenu(clContextMenuEvent& event)
             }
 
             int npmInstallPos = ::clFindMenuItemPosition(menu, npmInstallPosAfter);
-            if(npmInstallPos != wxNOT_FOUND) {
+            if (npmInstallPos != wxNOT_FOUND) {
                 npmInstallPos++; // install after it
                 menu->Insert(npmInstallPos, XRCID("nodejs_npm_install"), _("npm install"));
                 menu->Bind(wxEVT_MENU, &NodeJSWorkspaceView::OnNpmInstall, this, XRCID("nodejs_npm_install"));
@@ -129,12 +129,12 @@ void NodeJSWorkspaceView::OnFolderDropped(clCommandEvent& event)
 {
     // Add only non existent folders to the workspace
     const wxArrayString& folders = event.GetStrings();
-    if(folders.IsEmpty())
+    if (folders.IsEmpty())
         return;
 
-    if(!NodeJSWorkspace::Get()->IsOpen()) {
+    if (!NodeJSWorkspace::Get()->IsOpen()) {
         wxFileName workspaceFile(folders.Item(0), "");
-        if(!workspaceFile.GetDirCount()) {
+        if (!workspaceFile.GetDirCount()) {
             ::wxMessageBox(_("Can not create workspace in the root folder"), _("New Workspace"),
                            wxICON_ERROR | wxOK | wxCENTER);
             return;
@@ -148,10 +148,10 @@ void NodeJSWorkspaceView::OnFolderDropped(clCommandEvent& event)
         NodeJSWorkspace::Get()->Open(workspaceFile);
     }
 
-    if(NodeJSWorkspace::Get()->IsOpen()) {
+    if (NodeJSWorkspace::Get()->IsOpen()) {
         wxArrayString& workspaceFolders = NodeJSWorkspace::Get()->GetFolders();
-        for(size_t i = 0; i < folders.size(); ++i) {
-            if(workspaceFolders.Index(folders.Item(i)) == wxNOT_FOUND) {
+        for (size_t i = 0; i < folders.size(); ++i) {
+            if (workspaceFolders.Index(folders.Item(i)) == wxNOT_FOUND) {
                 // New folder, add it to the workspace
                 workspaceFolders.Add(folders.Item(i));
                 AddFolder(folders.Item(i));
@@ -171,19 +171,19 @@ void NodeJSWorkspaceView::RebuildTree()
 
     Clear();
 
-    for(size_t i = 0; i < paths.size(); ++i) {
+    for (size_t i = 0; i < paths.size(); ++i) {
         AddFolder(paths.Item(i));
     }
 
     IEditor* editor = clGetManager()->GetActiveEditor();
-    if(editor) {
+    if (editor) {
         ExpandToFile(editor->GetFileName());
     }
 }
 
 void NodeJSWorkspaceView::ShowHiddenFiles(bool show)
 {
-    if(show) {
+    if (show) {
         m_options |= kShowHiddenFiles;
         m_options |= kShowHiddenFolders;
     } else {
@@ -216,7 +216,7 @@ void NodeJSWorkspaceView::OnOpenPackageJsonFile(wxCommandEvent& event)
 {
     wxString path;
     wxTreeItemId item;
-    if(!GetSelectProjectPath(path, item))
+    if (!GetSelectProjectPath(path, item))
         return;
 
     wxFileName packageJson(path, "package.json");
@@ -241,7 +241,7 @@ bool NodeJSWorkspaceView::GetSelectProjectPath(wxString& path, wxTreeItemId& ite
     wxArrayString folders, files;
     wxArrayTreeItemIds folderItems, fileItems;
     GetSelections(folders, folderItems, files, fileItems);
-    if((folders.size() == 1) && (files.IsEmpty())) {
+    if ((folders.size() == 1) && (files.IsEmpty())) {
         path = folders.Item(0);
         item = folderItems.Item(0);
         return true;
@@ -253,12 +253,12 @@ void NodeJSWorkspaceView::DoExecuteProject(NodeJSDebuggerDlg::eDialogType type)
 {
     wxString path;
     wxTreeItemId item;
-    if(!GetSelectProjectPath(path, item))
+    if (!GetSelectProjectPath(path, item))
         return;
 
     NodeJSPackageJSON pj;
-    if(!pj.Load(path)) {
-        if(!pj.Create(path)) {
+    if (!pj.Load(path)) {
+        if (!pj.Create(path)) {
             ::wxMessageBox(_("Failed to load package.json file from path:\n") + path, "CodeLite",
                            wxICON_ERROR | wxOK | wxCENTER);
             return;
@@ -268,12 +268,12 @@ void NodeJSWorkspaceView::DoExecuteProject(NodeJSDebuggerDlg::eDialogType type)
     // Sanity
 
     // No debugger?
-    if(!NodeJSWorkspace::Get()->GetDebugger() &&
-       ((type == NodeJSDebuggerDlg::kDebug) || (type == NodeJSDebuggerDlg::kDebugCLI)))
+    if (!NodeJSWorkspace::Get()->GetDebugger() &&
+        ((type == NodeJSDebuggerDlg::kDebug) || (type == NodeJSDebuggerDlg::kDebugCLI)))
         return;
 
     NodeJSDebuggerDlg dlg(EventNotifier::Get()->TopFrame(), type, pj.GetScript(), pj.GetArgs());
-    if(dlg.ShowModal() != wxID_OK) {
+    if (dlg.ShowModal() != wxID_OK) {
         return;
     }
 
@@ -309,18 +309,20 @@ void NodeJSWorkspaceView::OnItemExpanding(wxTreeEvent& event)
     {
         // change the icon for the parent folder as well
         wxFileName packageJSON(itemData->GetPath(), "package.json");
-        if(packageJSON.FileExists()) {
-            GetTreeCtrl()->SetItemImage(item, imageIndex, imageIndexExpanded);
+        if (packageJSON.FileExists()) {
+            GetTreeCtrl()->SetItemImage(item, imageIndex);
+            GetTreeCtrl()->SetItemImage(item, imageIndexExpanded, wxTreeItemIcon_Expanded);
+            GetTreeCtrl()->SetItemImage(item, imageIndexExpanded, wxTreeItemIcon_SelectedExpanded);
         }
     }
 
     wxTreeItemIdValue cookie;
     wxTreeItemId child = GetTreeCtrl()->GetFirstChild(item, cookie);
-    while(child.IsOk()) {
+    while (child.IsOk()) {
         clTreeCtrlData* cd = GetItemData(child);
-        if(cd && cd->IsFolder()) {
+        if (cd && cd->IsFolder()) {
             wxFileName packageJSON(cd->GetPath(), "package.json");
-            if(packageJSON.FileExists()) {
+            if (packageJSON.FileExists()) {
                 // A project
                 GetTreeCtrl()->SetItemImage(child, imageIndex);
             }
@@ -335,7 +337,7 @@ void NodeJSWorkspaceView::OnNpmInit(wxCommandEvent& event)
 
     wxString path;
     wxTreeItemId item;
-    if(!GetSelectProjectPath(path, item))
+    if (!GetSelectProjectPath(path, item))
         return;
     clNodeJS::Get().NpmInit(path, this);
 }
@@ -351,11 +353,11 @@ void NodeJSWorkspaceView::OnNpmInstall(wxCommandEvent& event)
     wxUnusedVar(event);
     wxTreeItemId item;
     wxString path;
-    if(!GetSelectProjectPath(path, item))
+    if (!GetSelectProjectPath(path, item))
         return;
 
     wxString packageName = ::wxGetTextFromUser(_("Package name:"), "npm install");
-    if(packageName.IsEmpty()) {
+    if (packageName.IsEmpty()) {
         return;
     }
     clNodeJS::Get().NpmInstall(packageName, path, "--save", this);
@@ -371,7 +373,7 @@ void NodeJSWorkspaceView::OnFindInFilesDismissed(clFindInFilesEvent& event)
 {
     event.Skip();
     // Let the parent process this event first (it will handle any transient paths)
-    if(NodeJSWorkspace::Get()->IsOpen()) {
+    if (NodeJSWorkspace::Get()->IsOpen()) {
         // store the find in files mask
         clConfig::Get().Write("FindInFiles/NodeJS/LookIn", event.GetPaths());
         clConfig::Get().Write("FindInFiles/NodeJS/Mask", event.GetFileMask());
@@ -382,7 +384,7 @@ void NodeJSWorkspaceView::OnFindInFilesShowing(clFindInFilesEvent& event)
 {
     event.Skip();
     clTreeCtrlPanel::OnFindInFilesShowing(event);
-    if(NodeJSWorkspace::Get()->IsOpen()) {
+    if (NodeJSWorkspace::Get()->IsOpen()) {
         // store the find in files mask
         // Load the NodeJS workspace values from the configuration
         wxString mask = "*.js;*.html;*.css;*.scss;*.json;*.xml;*.ini;*.md;*.txt;*.text;.htaccess;*.sql";

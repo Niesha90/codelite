@@ -374,7 +374,7 @@ wxTreeItemId clTreeCtrlPanel::DoAddFile(const wxTreeItemId& parent, const wxStri
     // use gray text for hidden items
     if (isHidden) {
         // a hidden item, use a disabled colour
-        GetTreeCtrl()->SetItemTextColour(fileItem, GetTreeCtrl()->GetColours().GetGrayText());
+        GetTreeCtrl()->SetItemTextColour(fileItem, wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
     }
 
     return fileItem;
@@ -421,7 +421,7 @@ wxTreeItemId clTreeCtrlPanel::DoAddFolder(const wxTreeItemId& parent, const wxSt
     // use gray text for hidden items
     if (isHiddenFolder) {
         // a hidden item, use a disabled colour
-        GetTreeCtrl()->SetItemTextColour(itemFolder, GetTreeCtrl()->GetColours().GetGrayText());
+        GetTreeCtrl()->SetItemTextColour(itemFolder, wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
     }
 
     // Add this entry to the index
@@ -823,7 +823,7 @@ bool clTreeCtrlPanel::ExpandToFile(const wxFileName& file_to_search)
 void clTreeCtrlPanel::GetTopLevelFolders(wxArrayString& paths, wxArrayTreeItemIds& items) const
 {
     wxTreeItemIdValue cookie;
-    const clTreeCtrl* tree = m_treeCtrl;
+    const auto tree = m_treeCtrl;
     wxTreeItemId child = tree->GetFirstChild(tree->GetRootItem(), cookie);
     while (child.IsOk()) {
         clTreeCtrlData* clientData = GetItemData(child);

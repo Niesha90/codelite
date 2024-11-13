@@ -293,7 +293,7 @@ public:
      * @param type the type of tree
      * @sa TreeType
      */
-    virtual clTreeCtrl* GetFileExplorerTree() = 0;
+    virtual wxTreeCtrl* GetFileExplorerTree() = 0;
     virtual clTreeCtrl* GetWorkspaceTree() = 0;
 
     /**

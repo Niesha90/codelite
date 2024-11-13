@@ -2,8 +2,9 @@
 
 clFileViewerTreeCtrl::clFileViewerTreeCtrl(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
                                            long style)
-    : clThemedTreeCtrl(parent, id, pos, size, (style & ~wxTR_FULL_ROW_HIGHLIGHT))
+    : wxTreeCtrl(parent, id, pos, size, (style | wxTR_FULL_ROW_HIGHLIGHT))
 {
+#if 0
     std::function<bool(const wxTreeItemId&, const wxTreeItemId&)> SortFunc = [&](const wxTreeItemId& itemA,
                                                                                  const wxTreeItemId& itemB) {
         clTreeCtrlData* a = static_cast<clTreeCtrlData*>(GetItemData(itemA));
@@ -16,19 +17,22 @@ clFileViewerTreeCtrl::clFileViewerTreeCtrl(wxWindow* parent, wxWindowID id, cons
         return (a->GetName().CmpNoCase(b->GetName()) < 0);
     };
     SetSortFunction(SortFunc);
+#endif
 }
 
 clFileViewerTreeCtrl::~clFileViewerTreeCtrl() {}
+
+void clFileViewerTreeCtrl::SetBitmaps(BitmapLoader::Vec_t* bitmaps) { m_bitmaps = bitmaps; }
 
 wxTreeItemId clTreeNodeIndex::Find(const wxString& path)
 {
 #ifdef __WXMSW__
     wxString lcpath = path.Lower();
-    if(m_children.count(lcpath)) {
+    if (m_children.count(lcpath)) {
         return m_children.find(lcpath)->second;
     }
 #else
-    if(m_children.count(path)) {
+    if (m_children.count(path)) {
         return m_children.find(path)->second;
     }
 #endif

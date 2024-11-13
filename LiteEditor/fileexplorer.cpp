@@ -24,21 +24,13 @@
 //////////////////////////////////////////////////////////////////////////////
 #include "fileexplorer.h"
 
-#include "OpenFolderDlg.h"
 #include "SideBar.hpp"
 #include "clFileOrFolderDropTarget.h"
-#include "clToolBarButton.h"
 #include "clTreeCtrlPanel.h"
-#include "clWorkspaceView.h"
 #include "cl_config.h"
 #include "codelite_events.h"
-#include "editor_config.h"
-#include "event_notifier.h"
-#include "file_logger.h"
 #include "frame.h"
 #include "globals.h"
-#include "macros.h"
-#include "manager.h"
 #include "plugin.h"
 
 #include <wx/arrstr.h>
@@ -77,7 +69,7 @@ void FileExplorer::CreateGUIControls()
 void FileExplorer::OnFolderDropped(clCommandEvent& event)
 {
     const wxArrayString& folders = event.GetStrings();
-    for(size_t i = 0; i < folders.size(); ++i) {
+    for (size_t i = 0; i < folders.size(); ++i) {
         m_view->AddFolder(folders.Item(i));
     }
     clGetManager()->BookSelectPage(PaneId::SIDE_BAR, _("Explorer"));
@@ -88,7 +80,7 @@ void FileExplorer::OpenFolder(const wxString& path) { m_view->AddFolder(path); }
 void FileExplorer::OnOpenFolder(wxCommandEvent& event)
 {
     wxString path = ::wxDirSelector(_("Select folder to open"));
-    if(path.IsEmpty()) {
+    if (path.IsEmpty()) {
         return;
     }
     OpenFolder(path);

@@ -27,11 +27,11 @@
 #define CLFILEVIWERTREECTRL_H
 
 #include "clThemedTreeCtrl.h"
-#include "clTreeCtrl.h"
 #include "codelite_exports.h"
 #include "wxStringHash.h"
 
 #include <map>
+#include <wx/dataview.h>
 #include <wx/filename.h>
 #include <wx/treectrl.h>
 
@@ -78,7 +78,7 @@ public:
         : m_kind(kind)
         , m_index(NULL)
     {
-        if(IsFolder()) {
+        if (IsFolder()) {
             m_index = new clTreeNodeIndex();
         }
     }
@@ -95,14 +95,14 @@ public:
     void SetPath(const wxString& path)
     {
         this->m_path = path;
-        if(IsFolder()) {
+        if (IsFolder()) {
             wxFileName fn(m_path, "");
-            if(fn.GetDirCount()) {
+            if (fn.GetDirCount()) {
                 m_name = fn.GetDirs().Last();
             } else {
                 m_name = m_path;
             }
-        } else if(IsFile()) {
+        } else if (IsFile()) {
             wxFileName fn(m_path);
             m_name = fn.GetFullName();
         } else {
@@ -127,13 +127,19 @@ public:
     bool IsDummy() const { return m_kind == kDummy; }
 };
 
-class WXDLLIMPEXP_SDK clFileViewerTreeCtrl : public clThemedTreeCtrl
+#include "bitmap_loader.h"
+class WXDLLIMPEXP_SDK clFileViewerTreeCtrl : public wxTreeCtrl
 {
 public:
     clFileViewerTreeCtrl(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition,
                          const wxSize& size = wxDefaultSize,
-                         long style = wxTR_DEFAULT_STYLE | wxTR_MULTIPLE | wxTR_HIDE_ROOT | wxBORDER_STATIC);
+                         long style = wxTR_DEFAULT_STYLE | wxTR_MULTIPLE | wxTR_HIDE_ROOT | wxBORDER_NONE);
     virtual ~clFileViewerTreeCtrl();
+
+    void SetBitmaps(BitmapLoader::Vec_t* bitmaps);
+
+private:
+    BitmapLoader::Vec_t* m_bitmaps = nullptr;
 };
 
 #endif // CLFILEVIWERTREECTRL_H
