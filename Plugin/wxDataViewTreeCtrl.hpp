@@ -33,6 +33,8 @@ public:
     wxTreeItemId AddRoot(const wxString& text, int image = -1, int selImage = -1, wxTreeItemData* data = NULL);
     wxTreeItemId AppendItem(const wxTreeItemId& parent, const wxString& text, int image = -1, int selImage = -1,
                             wxTreeItemData* data = NULL);
+    wxTreeItemId AppendContainer(const wxTreeItemId& parent, const wxString& text, int image = -1, int selImage = -1,
+                                 wxTreeItemData* data = NULL);
     void Collapse(const wxTreeItemId& item);
     void CollapseAll();
     void CollapseAllChildren(const wxTreeItemId& item);
@@ -45,8 +47,6 @@ public:
     void Expand(const wxTreeItemId& item);
     wxTreeItemId GetFirstChild(const wxTreeItemId& item, wxTreeItemIdValue& cookie) const;
     wxTreeItemId GetNextChild(const wxTreeItemId& item, wxTreeItemIdValue& cookie) const;
-
-    /// API - WIP
     wxTreeItemData* GetItemData(const wxTreeItemId& item) const;
     wxString GetItemText(const wxTreeItemId& item) const;
     wxTreeItemId GetItemParent(const wxTreeItemId& item) const;
@@ -60,6 +60,13 @@ public:
     bool IsExpanded(const wxTreeItemId& item) const;
     void SetItemImage(const wxTreeItemId& item, int imageId);
 
+protected:
+    void OnItemExpandingInternal(wxDataViewEvent& event);
+    void OnItemExpandedInternal(wxDataViewEvent& event);
+    void OnItemActivatedInternal(wxDataViewEvent& event);
+    void OnItemContextMenuInternal(wxDataViewEvent& event);
+
 private:
     wxDataViewTreeCtrl* m_impl = nullptr;
+    wxTreeItemId m_root = {};
 };

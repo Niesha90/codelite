@@ -372,7 +372,7 @@ wxTreeItemId clTreeCtrlPanel::DoAddFile(const wxTreeItemId& parent, const wxStri
         parentData->GetIndex()->Add(filename.GetFullName(), fileItem);
     }
 
-    // use gray text for hidden items
+    // use grey text for hidden items
     if (isHidden) {
         // a hidden item, use a disabled colour
         GetTreeCtrl()->SetItemTextColour(fileItem, wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
@@ -383,7 +383,7 @@ wxTreeItemId clTreeCtrlPanel::DoAddFile(const wxTreeItemId& parent, const wxStri
 
 wxTreeItemId clTreeCtrlPanel::DoAddFolder(const wxTreeItemId& parent, const wxString& path)
 {
-    // If we already have this folder opened, dont re-add it
+    // If we already have this folder opened, don't re-add it
     wxArrayString topFolders;
     wxArrayTreeItemIds topFoldersItems;
     GetTopLevelFolders(topFolders, topFoldersItems);
@@ -417,9 +417,9 @@ wxTreeItemId clTreeCtrlPanel::DoAddFolder(const wxTreeItemId& parent, const wxSt
     int imgIdx = clBitmaps::Get().GetLoader()->GetMimeImageId(FileExtManager::TypeFolder, isHiddenFolder);
     int imgOpenedIDx = clBitmaps::Get().GetLoader()->GetMimeImageId(FileExtManager::TypeFolderExpanded, isHiddenFolder);
 
-    wxTreeItemId itemFolder = GetTreeCtrl()->AppendItem(parent, displayName, imgIdx, imgOpenedIDx, cd);
+    wxTreeItemId itemFolder = GetTreeCtrl()->AppendContainer(parent, displayName, imgIdx, imgOpenedIDx, cd);
 
-    // use gray text for hidden items
+    // use grey text for hidden items
     if (isHiddenFolder) {
         // a hidden item, use a disabled colour
         GetTreeCtrl()->SetItemTextColour(itemFolder, wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
