@@ -6,7 +6,7 @@
 #include <wx/dataview.h>
 #include <wx/treebase.h>
 
-/// Drop-in replacement for wxTreeCtrl implemented using
+/// Drop-in replacement for wxTreeCtrl implemented using `wxDataViewTreeCtrl`
 class wxTreeCtrlDataViewBase : public wxControl
 {
 public:
@@ -16,29 +16,29 @@ public:
                            long style = wxTR_DEFAULT_STYLE | wxTR_MULTIPLE | wxTR_HIDE_ROOT | wxBORDER_NONE);
     virtual ~wxTreeCtrlDataViewBase();
 
-    /// API
+    /// API - Implemented
+    void SetBitmaps(BitmapLoader::Vec_t* bitmaps);
     wxTreeItemId AddRoot(const wxString& text, int image = -1, int selImage = -1, wxTreeItemData* data = NULL);
     wxTreeItemId AppendItem(const wxTreeItemId& parent, const wxString& text, int image = -1, int selImage = -1,
                             wxTreeItemData* data = NULL);
     void Collapse(const wxTreeItemId& item);
     void CollapseAll();
     void CollapseAllChildren(const wxTreeItemId& item);
-    void Delete(const wxTreeItemId& item);
-    void DeleteAllItems();
     void DeleteChildren(const wxTreeItemId& item);
+    void DeleteAllItems();
+    void Delete(const wxTreeItemId& item);
     void EnsureVisible(const wxTreeItemId& item);
+    void SortChildren(const wxTreeItemId& item);
+    wxTreeItemId GetRootItem() const;
     void Expand(const wxTreeItemId& item);
-    void ExpandAll();
-    void ExpandAllChildren(const wxTreeItemId& item);
+
+    /// API - WIP
     wxTreeItemId GetFirstChild(const wxTreeItemId& item, wxTreeItemIdValue& cookie) const;
     wxTreeItemId GetNextChild(const wxTreeItemId& item, wxTreeItemIdValue& cookie) const;
     wxTreeItemId GetFirstVisibleItem() const;
     wxTreeItemData* GetItemData(const wxTreeItemId& item) const;
     wxString GetItemText(const wxTreeItemId& item) const;
     wxTreeItemId GetItemParent(const wxTreeItemId& item) const;
-    void SortChildren(const wxTreeItemId& item);
-    wxTreeItemId GetRootItem() const;
-    void SetBitmaps(BitmapLoader::Vec_t* bitmaps);
     bool ItemHasChildren(const wxTreeItemId& item) const;
     wxTreeItemId GetFocusedItem() const;
     void SetItemTextColour(const wxTreeItemId& item, const wxColour& col);
@@ -49,5 +49,5 @@ public:
     bool IsExpanded(const wxTreeItemId& item) const;
 
 private:
-    wxDataViewListCtrl* m_impl = nullptr;
+    wxDataViewTreeCtrl* m_impl = nullptr;
 };
