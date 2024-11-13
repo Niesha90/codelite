@@ -123,6 +123,8 @@ wxTreeItemId wxTreeCtrlDataViewBase::GetNextChild(const wxTreeItemId& item, wxTr
 
     auto child = to_tree_item(m_impl->GetStore()->GetNthChild(parent, next_index));
     next_index++;
+    // Update the cookie
+    cookie = (wxTreeItemIdValue)next_index;
     return child;
 }
 
