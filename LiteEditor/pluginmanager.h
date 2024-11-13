@@ -27,6 +27,7 @@
 
 #include "Notebook.h"
 #include "clAuiBook.hpp"
+#include "clFileViwerTreeCtrl.h"
 #include "clToolBar.h"
 #include "debugger.h"
 #include "dynamiclibrary.h"
@@ -94,7 +95,7 @@ public:
     wxMenuBar* GetMenuBar() override;
     IConfigTool* GetConfigTool() override;
     TreeItemInfo GetSelectedTreeItemInfo(TreeType type) override;
-    wxTreeCtrl* GetFileExplorerTree() override;
+    clFileViewerTreeCtrl* GetFileExplorerTree() override;
     clTreeCtrl* GetWorkspaceTree() override;
     MainNotebook* GetMainNotebook() override;
     IEditor* OpenFile(const wxString& fileName, const wxString& projectName = wxEmptyString, int lineno = wxNOT_FOUND,

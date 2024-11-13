@@ -27,6 +27,7 @@
 #define IMANAGER_H
 
 #include "bitmap_loader.h"
+#include "clFileViwerTreeCtrl.h"
 #include "clStatusBar.h"
 #include "clTab.h"
 #include "clToolBar.h"
@@ -293,7 +294,7 @@ public:
      * @param type the type of tree
      * @sa TreeType
      */
-    virtual wxTreeCtrl* GetFileExplorerTree() = 0;
+    virtual clFileViewerTreeCtrl* GetFileExplorerTree() = 0;
     virtual clTreeCtrl* GetWorkspaceTree() = 0;
 
     /**

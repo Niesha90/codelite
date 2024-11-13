@@ -311,8 +311,6 @@ void NodeJSWorkspaceView::OnItemExpanding(wxTreeEvent& event)
         wxFileName packageJSON(itemData->GetPath(), "package.json");
         if (packageJSON.FileExists()) {
             GetTreeCtrl()->SetItemImage(item, imageIndex);
-            GetTreeCtrl()->SetItemImage(item, imageIndexExpanded, wxTreeItemIcon_Expanded);
-            GetTreeCtrl()->SetItemImage(item, imageIndexExpanded, wxTreeItemIcon_SelectedExpanded);
         }
     }
 

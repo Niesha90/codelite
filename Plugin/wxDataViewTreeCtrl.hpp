@@ -6,8 +6,20 @@
 #include <wx/dataview.h>
 #include <wx/treebase.h>
 
+class WXDLLIMPEXP_SDK wxTreeCtrlDataViewBaseCookie
+{
+public:
+    wxTreeCtrlDataViewBaseCookie() {}
+    bool CanNext() const { return m_index < m_children.size(); }
+    wxTreeItemId Next();
+
+private:
+    wxDataViewItemArray m_children;
+    size_t m_index = 0;
+};
+
 /// Drop-in replacement for wxTreeCtrl implemented using `wxDataViewTreeCtrl`
-class wxTreeCtrlDataViewBase : public wxControl
+class WXDLLIMPEXP_SDK wxTreeCtrlDataViewBase : public wxControl
 {
 public:
     wxTreeCtrlDataViewBase();
@@ -31,22 +43,22 @@ public:
     void SortChildren(const wxTreeItemId& item);
     wxTreeItemId GetRootItem() const;
     void Expand(const wxTreeItemId& item);
-
-    /// API - WIP
     wxTreeItemId GetFirstChild(const wxTreeItemId& item, wxTreeItemIdValue& cookie) const;
     wxTreeItemId GetNextChild(const wxTreeItemId& item, wxTreeItemIdValue& cookie) const;
-    wxTreeItemId GetFirstVisibleItem() const;
+
+    /// API - WIP
     wxTreeItemData* GetItemData(const wxTreeItemId& item) const;
     wxString GetItemText(const wxTreeItemId& item) const;
     wxTreeItemId GetItemParent(const wxTreeItemId& item) const;
     bool ItemHasChildren(const wxTreeItemId& item) const;
     wxTreeItemId GetFocusedItem() const;
     void SetItemTextColour(const wxTreeItemId& item, const wxColour& col);
-    size_t GetSelections(wxArrayTreeItemIds& selection) const;
+    size_t GetSelections(wxArrayTreeItemIds& selections) const;
     void SelectItem(const wxTreeItemId& item, bool select = true);
     bool IsSelected(const wxTreeItemId& item) const;
     void SetItemText(const wxTreeItemId& item, const wxString& text);
     bool IsExpanded(const wxTreeItemId& item) const;
+    void SetItemImage(const wxTreeItemId& item, int imageId);
 
 private:
     wxDataViewTreeCtrl* m_impl = nullptr;

@@ -367,7 +367,7 @@ TreeItemInfo PluginManager::GetSelectedTreeItemInfo(TreeType type)
 
 clTreeCtrl* PluginManager::GetWorkspaceTree() { return clMainFrame::Get()->GetWorkspaceTab()->GetFileView(); }
 
-wxTreeCtrl* PluginManager::GetFileExplorerTree() { return clMainFrame::Get()->GetFileExplorer()->GetTree(); }
+clFileViewerTreeCtrl* PluginManager::GetFileExplorerTree() { return clMainFrame::Get()->GetFileExplorer()->GetTree(); }
 
 MainNotebook* PluginManager::GetMainNotebook() { return clMainFrame::Get()->GetMainBook()->GetNotebook(); }
 
