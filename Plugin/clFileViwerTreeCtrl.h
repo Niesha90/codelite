@@ -130,13 +130,17 @@ public:
 #include "bitmap_loader.h"
 class WXDLLIMPEXP_SDK clFileViewerTreeCtrl : public wxTreeCtrl
 {
+    wxDECLARE_DYNAMIC_CLASS(clFileViewerTreeCtrl);
+
 public:
+    clFileViewerTreeCtrl();
     clFileViewerTreeCtrl(wxWindow* parent, wxWindowID id = wxID_ANY, const wxPoint& pos = wxDefaultPosition,
                          const wxSize& size = wxDefaultSize,
                          long style = wxTR_DEFAULT_STYLE | wxTR_MULTIPLE | wxTR_HIDE_ROOT | wxBORDER_NONE);
     virtual ~clFileViewerTreeCtrl();
 
     void SetBitmaps(BitmapLoader::Vec_t* bitmaps);
+    int OnCompareItems(const wxTreeItemId& item1, const wxTreeItemId& item2) override;
 
 private:
     BitmapLoader::Vec_t* m_bitmaps = nullptr;

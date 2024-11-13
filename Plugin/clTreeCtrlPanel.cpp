@@ -318,6 +318,7 @@ void clTreeCtrlPanel::DoExpandItem(const wxTreeItemId& parent, bool expand)
 
     // Sort the parent
     if (GetTreeCtrl()->ItemHasChildren(parent)) {
+        GetTreeCtrl()->SortChildren(parent);
         if (expand) {
             GetTreeCtrl()->Expand(parent);
         }
