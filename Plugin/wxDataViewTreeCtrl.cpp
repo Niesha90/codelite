@@ -32,11 +32,13 @@ wxTreeCtrlDataViewBase::wxTreeCtrlDataViewBase(wxWindow* parent, wxWindowID id, 
     m_impl = new wxDataViewTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_MULTIPLE | wxDV_NO_HEADER);
     SetSizer(new wxBoxSizer(wxVERTICAL));
     GetSizer()->Add(m_impl, wxSizerFlags(1).Expand());
-
     m_impl->Bind(wxEVT_DATAVIEW_ITEM_EXPANDED, &wxTreeCtrlDataViewBase::OnItemExpandedInternal, this);
     m_impl->Bind(wxEVT_DATAVIEW_ITEM_EXPANDING, &wxTreeCtrlDataViewBase::OnItemExpandingInternal, this);
     m_impl->Bind(wxEVT_DATAVIEW_ITEM_ACTIVATED, &wxTreeCtrlDataViewBase::OnItemActivatedInternal, this);
     m_impl->Bind(wxEVT_DATAVIEW_ITEM_CONTEXT_MENU, &wxTreeCtrlDataViewBase::OnItemContextMenuInternal, this);
+
+    // Disable item editing
+    m_impl->Bind(wxEVT_DATAVIEW_ITEM_START_EDITING, [](wxDataViewEvent& event) { event.Veto(); });
 }
 
 wxTreeCtrlDataViewBase::wxTreeCtrlDataViewBase() {}
