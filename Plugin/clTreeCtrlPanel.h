@@ -113,7 +113,7 @@ public:
     /**
      * @brief add top level folder
      */
-    void AddFolder(const wxString& path);
+    void AddTopLevelFolder(const wxString& path);
 
     /**
      * @brief return an info about the selected items in the tree

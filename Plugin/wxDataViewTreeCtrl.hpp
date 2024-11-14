@@ -48,6 +48,7 @@ public:
     wxTreeItemId GetFirstChild(const wxTreeItemId& item, wxTreeItemIdValue& cookie) const;
     wxTreeItemId GetNextChild(const wxTreeItemId& item, wxTreeItemIdValue& cookie) const;
     wxTreeItemData* GetItemData(const wxTreeItemId& item) const;
+    wxTreeItemData* GetRootItemData() const;
     wxString GetItemText(const wxTreeItemId& item) const;
     wxTreeItemId GetItemParent(const wxTreeItemId& item) const;
     bool ItemHasChildren(const wxTreeItemId& item) const;
@@ -68,5 +69,5 @@ protected:
 
 private:
     wxDataViewTreeCtrl* m_impl = nullptr;
-    wxTreeItemId m_root = {};
+    wxTreeItemData* m_rootItemData = nullptr;
 };

@@ -338,7 +338,7 @@ void clFileSystemWorkspace::DoOpen()
     }
 
     // And now load the main folder
-    GetView()->AddFolder(GetDir());
+    GetView()->AddTopLevelFolder(GetDir());
 
     // Notify CodeLite that this workspace is opened
     clGetManager()->GetWorkspaceView()->SelectPage(GetWorkspaceType());

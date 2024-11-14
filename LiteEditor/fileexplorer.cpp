@@ -70,12 +70,12 @@ void FileExplorer::OnFolderDropped(clCommandEvent& event)
 {
     const wxArrayString& folders = event.GetStrings();
     for (size_t i = 0; i < folders.size(); ++i) {
-        m_view->AddFolder(folders.Item(i));
+        m_view->AddTopLevelFolder(folders.Item(i));
     }
     clGetManager()->BookSelectPage(PaneId::SIDE_BAR, _("Explorer"));
 }
 
-void FileExplorer::OpenFolder(const wxString& path) { m_view->AddFolder(path); }
+void FileExplorer::OpenFolder(const wxString& path) { m_view->AddTopLevelFolder(path); }
 
 void FileExplorer::OnOpenFolder(wxCommandEvent& event)
 {

@@ -6,12 +6,12 @@
 
 namespace
 {
-wxTreeItemId to_tree_item(const wxDataViewItem& item)
+wxTreeItemId ToTreeItem(const wxDataViewItem& item)
 {
     wxTreeItemId tree_item(item.m_pItem);
     return tree_item;
 }
-wxDataViewItem from_tree_item(const wxTreeItemId& item)
+wxDataViewItem FromTreeItem(const wxTreeItemId& item)
 {
     wxDataViewItem dv_item(item.m_pItem);
     return dv_item;
@@ -22,7 +22,7 @@ wxTreeItemId wxTreeCtrlDataViewBaseCookie::Next()
 {
     auto item = m_children[m_index];
     ++m_index;
-    return to_tree_item(item);
+    return ToTreeItem(item);
 }
 
 wxTreeCtrlDataViewBase::wxTreeCtrlDataViewBase(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
@@ -61,6 +61,7 @@ wxTreeCtrlDataViewBase::~wxTreeCtrlDataViewBase()
         m_impl->Unbind(wxEVT_DATAVIEW_ITEM_ACTIVATED, &wxTreeCtrlDataViewBase::OnItemActivatedInternal, this);
         m_impl->Unbind(wxEVT_DATAVIEW_ITEM_CONTEXT_MENU, &wxTreeCtrlDataViewBase::OnItemContextMenuInternal, this);
     }
+    m_rootItemData = nullptr;
 }
 
 void wxTreeCtrlDataViewBase::SetBitmaps(BitmapLoader::Vec_t* bitmaps)
@@ -74,27 +75,33 @@ void wxTreeCtrlDataViewBase::SetBitmaps(BitmapLoader::Vec_t* bitmaps)
 
 wxTreeItemId wxTreeCtrlDataViewBase::AddRoot(const wxString& text, int image, int selImage, wxTreeItemData* data)
 {
-    m_root = to_tree_item(m_impl->AppendContainer(wxDataViewItem(0), text, image, selImage, data));
-    return m_root;
+    // Allocate fake root item
+    wxUnusedVar(text);
+    wxUnusedVar(image);
+    wxUnusedVar(selImage);
+
+    wxDELETE(m_rootItemData);
+    m_rootItemData = data;
+    return {};
 }
 
 wxTreeItemId wxTreeCtrlDataViewBase::AppendItem(const wxTreeItemId& parent, const wxString& text, int image,
                                                 [[maybe_unused]] int selImage, wxTreeItemData* data)
 {
-    wxDataViewItem dvitem = from_tree_item(parent);
-    return to_tree_item(m_impl->AppendItem(dvitem, text, image, data));
+    wxDataViewItem dvitem = FromTreeItem(parent);
+    return ToTreeItem(m_impl->AppendItem(dvitem, text, image, data));
 }
 
 wxTreeItemId wxTreeCtrlDataViewBase::AppendContainer(const wxTreeItemId& parent, const wxString& text, int image,
                                                      int selImage, wxTreeItemData* data)
 {
-    wxDataViewItem dvitem = from_tree_item(parent);
-    return to_tree_item(m_impl->AppendContainer(dvitem, text, image, selImage, data));
+    wxDataViewItem dvitem = FromTreeItem(parent);
+    return ToTreeItem(m_impl->AppendContainer(dvitem, text, image, selImage, data));
 }
 
 void wxTreeCtrlDataViewBase::Collapse(const wxTreeItemId& item)
 {
-    wxDataViewItem dvitem = from_tree_item(item);
+    wxDataViewItem dvitem = FromTreeItem(item);
     m_impl->Collapse(dvitem);
 }
 
@@ -105,7 +112,7 @@ void wxTreeCtrlDataViewBase::CollapseAllChildren(const wxTreeItemId& item)
     wxWindowUpdateLocker locker{ m_impl };
     // Go over all the items and collapse them recursively
     wxVector<wxDataViewItem> queue;
-    queue.push_back(from_tree_item(item));
+    queue.push_back(FromTreeItem(item));
     while (!queue.empty()) {
         auto item = queue.front();
         queue.erase(queue.begin());
@@ -121,34 +128,34 @@ void wxTreeCtrlDataViewBase::CollapseAllChildren(const wxTreeItemId& item)
 
 void wxTreeCtrlDataViewBase::DeleteChildren(const wxTreeItemId& item)
 {
-    auto dvitem = from_tree_item(item);
+    auto dvitem = FromTreeItem(item);
     m_impl->DeleteChildren(dvitem);
 }
 
 void wxTreeCtrlDataViewBase::DeleteAllItems()
 {
     m_impl->DeleteAllItems();
-    m_root = {};
+    wxDELETE(m_rootItemData);
 }
 
 void wxTreeCtrlDataViewBase::Delete(const wxTreeItemId& item)
 {
-    if (m_root == item) {
-        m_root = {};
+    if (!item.IsOk()) {
+        return;
     }
-    m_impl->DeleteItem(from_tree_item(item));
+    m_impl->DeleteItem(FromTreeItem(item));
 }
 
-void wxTreeCtrlDataViewBase::EnsureVisible(const wxTreeItemId& item) { m_impl->EnsureVisible(from_tree_item(item)); }
+void wxTreeCtrlDataViewBase::EnsureVisible(const wxTreeItemId& item) { m_impl->EnsureVisible(FromTreeItem(item)); }
 
 void wxTreeCtrlDataViewBase::SortChildren([[maybe_unused]] const wxTreeItemId& item)
 {
     // Not implemented for now
 }
 
-wxTreeItemId wxTreeCtrlDataViewBase::GetRootItem() const { return m_root; }
+wxTreeItemId wxTreeCtrlDataViewBase::GetRootItem() const { return wxTreeItemId{ nullptr }; }
 
-void wxTreeCtrlDataViewBase::Expand(const wxTreeItemId& item) { m_impl->Expand(from_tree_item(item)); }
+void wxTreeCtrlDataViewBase::Expand(const wxTreeItemId& item) { m_impl->Expand(FromTreeItem(item)); }
 
 wxTreeItemId wxTreeCtrlDataViewBase::GetFirstChild(const wxTreeItemId& item, wxTreeItemIdValue& cookie) const
 {
@@ -159,12 +166,12 @@ wxTreeItemId wxTreeCtrlDataViewBase::GetFirstChild(const wxTreeItemId& item, wxT
 wxTreeItemId wxTreeCtrlDataViewBase::GetNextChild(const wxTreeItemId& item, wxTreeItemIdValue& cookie) const
 {
     size_t next_index = (size_t)cookie;
-    auto parent = from_tree_item(item);
+    auto parent = FromTreeItem(item);
     if (m_impl->GetChildCount(parent) <= next_index) {
         return {};
     }
 
-    auto child = to_tree_item(m_impl->GetStore()->GetNthChild(parent, next_index));
+    auto child = ToTreeItem(m_impl->GetStore()->GetNthChild(parent, next_index));
     next_index++;
     // Update the cookie
     cookie = (wxTreeItemIdValue)next_index;
@@ -173,29 +180,40 @@ wxTreeItemId wxTreeCtrlDataViewBase::GetNextChild(const wxTreeItemId& item, wxTr
 
 wxTreeItemData* wxTreeCtrlDataViewBase::GetItemData(const wxTreeItemId& item) const
 {
-    auto dvitem = from_tree_item(item);
+    if (!item.IsOk()) {
+        // the root
+        return m_rootItemData;
+    }
+
+    auto dvitem = FromTreeItem(item);
     return dynamic_cast<wxTreeItemData*>(m_impl->GetItemData(dvitem));
+}
+
+wxTreeItemData* wxTreeCtrlDataViewBase::GetRootItemData() const
+{
+    // the root
+    return m_rootItemData;
 }
 
 wxString wxTreeCtrlDataViewBase::GetItemText(const wxTreeItemId& item) const
 {
-    auto dvitem = from_tree_item(item);
+    auto dvitem = FromTreeItem(item);
     return m_impl->GetItemText(dvitem);
 }
 
 wxTreeItemId wxTreeCtrlDataViewBase::GetItemParent(const wxTreeItemId& item) const
 {
-    auto dvitem = from_tree_item(item);
-    return to_tree_item(m_impl->GetItemParent(dvitem));
+    auto dvitem = FromTreeItem(item);
+    return ToTreeItem(m_impl->GetItemParent(dvitem));
 }
 
 bool wxTreeCtrlDataViewBase::ItemHasChildren(const wxTreeItemId& item) const
 {
-    auto dvitem = from_tree_item(item);
+    auto dvitem = FromTreeItem(item);
     return m_impl->GetStore()->GetChildCount(dvitem) > 0;
 }
 
-wxTreeItemId wxTreeCtrlDataViewBase::GetFocusedItem() const { return to_tree_item(m_impl->GetSelection()); }
+wxTreeItemId wxTreeCtrlDataViewBase::GetFocusedItem() const { return ToTreeItem(m_impl->GetSelection()); }
 
 void wxTreeCtrlDataViewBase::SetItemTextColour(const wxTreeItemId& item, const wxColour& col)
 {
@@ -212,14 +230,14 @@ size_t wxTreeCtrlDataViewBase::GetSelections(wxArrayTreeItemIds& selections) con
 
     selections.reserve(dv_selections.size());
     for (const auto& dvitem : dv_selections) {
-        selections.push_back(to_tree_item(dvitem));
+        selections.push_back(ToTreeItem(dvitem));
     }
     return selections.size();
 }
 
 void wxTreeCtrlDataViewBase::SelectItem(const wxTreeItemId& item, bool select)
 {
-    auto dvitem = from_tree_item(item);
+    auto dvitem = FromTreeItem(item);
     if (select) {
         m_impl->UnselectAll();
         m_impl->Select(dvitem);
@@ -241,12 +259,12 @@ bool wxTreeCtrlDataViewBase::IsSelected(const wxTreeItemId& item) const
 
 void wxTreeCtrlDataViewBase::SetItemText(const wxTreeItemId& item, const wxString& text)
 {
-    m_impl->SetItemText(from_tree_item(item), text);
+    m_impl->SetItemText(FromTreeItem(item), text);
 }
 
 bool wxTreeCtrlDataViewBase::IsExpanded(const wxTreeItemId& item) const
 {
-    return m_impl->IsExpanded(from_tree_item(item));
+    return m_impl->IsExpanded(FromTreeItem(item));
 }
 
 void wxTreeCtrlDataViewBase::SetItemImage(const wxTreeItemId& item, int imageId)
@@ -259,7 +277,7 @@ void wxTreeCtrlDataViewBase::SetItemImage(const wxTreeItemId& item, int imageId)
         return;
     }
 
-    auto dvitem = from_tree_item(item);
+    auto dvitem = FromTreeItem(item);
     m_impl->SetItemIcon(dvitem, bmp);
 }
 
@@ -270,7 +288,7 @@ void wxTreeCtrlDataViewBase::SetItemImage(const wxTreeItemId& item, int imageId)
 void wxTreeCtrlDataViewBase::OnItemExpandingInternal(wxDataViewEvent& event)
 {
     wxTreeEvent treeEvent{ wxEVT_TREE_ITEM_EXPANDING };
-    treeEvent.SetItem(to_tree_item(event.GetItem()));
+    treeEvent.SetItem(ToTreeItem(event.GetItem()));
     treeEvent.SetEventObject(this);
     GetEventHandler()->ProcessEvent(treeEvent);
 
@@ -284,7 +302,7 @@ void wxTreeCtrlDataViewBase::OnItemExpandingInternal(wxDataViewEvent& event)
 void wxTreeCtrlDataViewBase::OnItemExpandedInternal(wxDataViewEvent& event)
 {
     wxTreeEvent treeEvent{ wxEVT_TREE_ITEM_EXPANDED };
-    treeEvent.SetItem(to_tree_item(event.GetItem()));
+    treeEvent.SetItem(ToTreeItem(event.GetItem()));
     treeEvent.SetEventObject(this);
     GetEventHandler()->ProcessEvent(treeEvent);
     event.Skip();
@@ -293,7 +311,7 @@ void wxTreeCtrlDataViewBase::OnItemExpandedInternal(wxDataViewEvent& event)
 void wxTreeCtrlDataViewBase::OnItemActivatedInternal(wxDataViewEvent& event)
 {
     wxTreeEvent treeEvent{ wxEVT_TREE_ITEM_ACTIVATED };
-    treeEvent.SetItem(to_tree_item(event.GetItem()));
+    treeEvent.SetItem(ToTreeItem(event.GetItem()));
     treeEvent.SetEventObject(this);
     GetEventHandler()->ProcessEvent(treeEvent);
     event.Skip();
@@ -302,7 +320,7 @@ void wxTreeCtrlDataViewBase::OnItemActivatedInternal(wxDataViewEvent& event)
 void wxTreeCtrlDataViewBase::OnItemContextMenuInternal(wxDataViewEvent& event)
 {
     wxTreeEvent treeEvent{ wxEVT_TREE_ITEM_MENU };
-    treeEvent.SetItem(to_tree_item(event.GetItem()));
+    treeEvent.SetItem(ToTreeItem(event.GetItem()));
     treeEvent.SetEventObject(this);
     GetEventHandler()->ProcessEvent(treeEvent);
     event.Skip();

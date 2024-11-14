@@ -56,7 +56,7 @@ void clDockerWorkspaceView::OnWorkspaceOpened(clWorkspaceEvent& event)
     event.Skip();
     if(clDockerWorkspace::Get()->IsOpen()) {
         wxFileName workspaceFile(event.GetString());
-        AddFolder(workspaceFile.GetPath());
+        AddTopLevelFolder(workspaceFile.GetPath());
     }
 }
 

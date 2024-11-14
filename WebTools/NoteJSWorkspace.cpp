@@ -215,7 +215,7 @@ bool NodeJSWorkspace::DoOpen(const wxFileName& filename)
 
     const wxArrayString& folders = GetFolders();
     for(size_t i = 0; i < folders.size(); ++i) {
-        GetView()->AddFolder(folders.Item(i));
+        GetView()->AddTopLevelFolder(folders.Item(i));
     }
 
     // Notify codelite that NodeJS workspace is opened

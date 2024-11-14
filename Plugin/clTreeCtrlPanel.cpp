@@ -251,7 +251,7 @@ void clTreeCtrlPanel::OnFolderDropped(clCommandEvent& event)
 {
     const wxArrayString& folders = event.GetStrings();
     for (size_t i = 0; i < folders.size(); ++i) {
-        AddFolder(folders.Item(i));
+        AddTopLevelFolder(folders.Item(i));
     }
     ::clGetManager()->GetWorkspaceView()->SelectPage(GetViewName());
 }
@@ -315,12 +315,15 @@ void clTreeCtrlPanel::DoExpandItem(const wxTreeItemId& parent, bool expand)
 
 clTreeCtrlData* clTreeCtrlPanel::GetItemData(const wxTreeItemId& item) const
 {
-    CHECK_ITEM_RET_NULL(item);
-    clTreeCtrlData* cd = dynamic_cast<clTreeCtrlData*>(m_treeCtrl->GetItemData(item));
-    return cd;
+    if (!item.IsOk()) {
+        // The root item is nullptr
+        return dynamic_cast<clTreeCtrlData*>(m_treeCtrl->GetRootItemData());
+    } else {
+        return dynamic_cast<clTreeCtrlData*>(m_treeCtrl->GetItemData(item));
+    }
 }
 
-void clTreeCtrlPanel::AddFolder(const wxString& path)
+void clTreeCtrlPanel::AddTopLevelFolder(const wxString& path)
 {
     wxTreeItemId itemFolder = DoAddFolder(GetTreeCtrl()->GetRootItem(), path);
     DoExpandItem(itemFolder, false);
@@ -387,7 +390,7 @@ wxTreeItemId clTreeCtrlPanel::DoAddFolder(const wxTreeItemId& parent, const wxSt
     clTreeCtrlData* parentData = GetItemData(parent);
     if (!parentData) {
         wxDELETE(cd);
-        return wxTreeItemId();
+        return {};
     }
 
     // Check the index before adding new folder
@@ -857,8 +860,8 @@ void clTreeCtrlPanel::DoRenameItem(const wxTreeItemId& item, const wxString& old
 
     // Update the parent's cache
     wxTreeItemId parent = GetTreeCtrl()->GetItemParent(item);
-    CHECK_ITEM_RET(parent);
     clTreeCtrlData* parentData = GetItemData(parent);
+    CHECK_PTR_RET(parentData);
 
     // Update the parent cache
     if (parentData->GetIndex()) {
@@ -914,7 +917,7 @@ void clTreeCtrlPanel::OnInitDone(wxCommandEvent& event)
 
         pinnedFolders = GetConfig()->Read("ExplorerFolders", pinnedFolders);
         for (size_t i = 0; i < pinnedFolders.size(); ++i) {
-            AddFolder(pinnedFolders.Item(i));
+            AddTopLevelFolder(pinnedFolders.Item(i));
         }
     }
 }
