@@ -29,7 +29,18 @@ wxTreeCtrlDataViewBase::wxTreeCtrlDataViewBase(wxWindow* parent, wxWindowID id, 
                                                long style)
     : wxControl(parent, wxID_ANY)
 {
-    m_impl = new wxDataViewTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxDV_MULTIPLE | wxDV_NO_HEADER);
+    m_impl = new wxDataViewTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
+                                    wxDV_MULTIPLE | wxDV_NO_HEADER | wxDV_ROW_LINES | wxBORDER_NONE);
+
+#if defined(__WXMSW__)
+    wxColour wincolour = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
+    if (wxSystemSettings::GetAppearance().IsDark()) {
+        m_impl->SetAlternateRowColour(wincolour.ChangeLightness(102));
+    } else {
+        m_impl->SetAlternateRowColour(wincolour.ChangeLightness(98));
+    }
+#endif
+
     SetSizer(new wxBoxSizer(wxVERTICAL));
     GetSizer()->Add(m_impl, wxSizerFlags(1).Expand());
     m_impl->Bind(wxEVT_DATAVIEW_ITEM_EXPANDED, &wxTreeCtrlDataViewBase::OnItemExpandedInternal, this);

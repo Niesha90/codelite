@@ -266,28 +266,15 @@ void clTreeCtrlPanel::DoExpandItem(const wxTreeItemId& parent, bool expand)
         return;
     wxString folderPath = cd->GetPath();
 
-    if (!m_treeCtrl->ItemHasChildren(parent))
+    // Item already loaded?
+    if (m_treeCtrl->ItemHasChildren(parent))
         return;
-    // Test the first item for dummy
-
-    wxTreeItemIdValue cookie;
-    wxTreeItemId child = m_treeCtrl->GetFirstChild(parent, cookie);
-    CHECK_ITEM_RET(child);
-
-    cd = GetItemData(child);
-    CHECK_PTR_RET(cd);
-
-    // If not dummy - already expanded do nothing here
-    if (!cd->IsDummy())
-        return;
-
-    m_treeCtrl->Delete(child);
-    cd = NULL;
 
     // Get the top level folders
     wxDir dir(folderPath);
     if (!dir.IsOpened())
         return;
+
     wxBusyCursor bc;
     wxString filename;
     bool cont = dir.GetFirst(&filename, wxEmptyString);
@@ -320,7 +307,7 @@ void clTreeCtrlPanel::DoExpandItem(const wxTreeItemId& parent, bool expand)
     if (GetTreeCtrl()->ItemHasChildren(parent)) {
         GetTreeCtrl()->SortChildren(parent);
         if (expand) {
-            GetTreeCtrl()->Expand(parent);
+            GetTreeCtrl()->CallAfter(&wxTreeCtrlDataViewBase::Expand, parent);
         }
         SelectItem(parent);
     }
@@ -429,9 +416,6 @@ wxTreeItemId clTreeCtrlPanel::DoAddFolder(const wxTreeItemId& parent, const wxSt
     if (parentData->GetIndex()) {
         parentData->GetIndex()->Add(displayName, itemFolder);
     }
-
-    // Append the dummy item
-    GetTreeCtrl()->AppendItem(itemFolder, "Dummy", -1, -1, new clTreeCtrlData(clTreeCtrlData::kDummy));
 
     // Pin this folder
     if (GetConfig() && IsTopLevelFolder(itemFolder)) {
@@ -1130,9 +1114,6 @@ void clTreeCtrlPanel::RefreshNonTopLevelFolder(const wxTreeItemId& item)
     // Clear the item children
     GetTreeCtrl()->DeleteChildren(item);
 
-    // Append the dummy item
-    GetTreeCtrl()->AppendItem(item, "Dummy", -1, -1, new clTreeCtrlData(clTreeCtrlData::kDummy));
-
     // Clear the folder index
     if (cd->GetIndex()) {
         cd->GetIndex()->Clear();
@@ -1153,6 +1134,7 @@ void clTreeCtrlPanel::OnRenameFolder(wxCommandEvent& event)
     if (folderItems.size() != 1) {
         return;
     }
+
     wxTreeItemId item = folderItems.Item(0);
     if (IsTopLevelFolder(item)) {
         clWARNING() << "Renaming of top level folder is not supported";
