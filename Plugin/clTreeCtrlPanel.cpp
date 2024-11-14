@@ -264,43 +264,51 @@ void clTreeCtrlPanel::DoExpandItem(const wxTreeItemId& parent, bool expand)
     // we only know how to expand folders...
     if (!cd->IsFolder())
         return;
+
     wxString folderPath = cd->GetPath();
 
-    // Item already loaded?
-    if (m_treeCtrl->ItemHasChildren(parent))
-        return;
+    // If this item has a dummy node - delete it
+    wxTreeItemIdValue cookie;
+    auto first_child = GetTreeCtrl()->GetFirstChild(parent, cookie);
+    if (first_child.IsOk() && GetItemData(first_child) && GetItemData(first_child)->IsDummy()) {
+        GetTreeCtrl()->DeleteChildren(parent);
+    }
 
-    // Get the top level folders
-    wxDir dir(folderPath);
-    if (!dir.IsOpened())
-        return;
+    // If there are no items, scan the disk
+    if (!GetTreeCtrl()->ItemHasChildren(parent)) {
 
-    wxBusyCursor bc;
-    wxString filename;
-    bool cont = dir.GetFirst(&filename, wxEmptyString);
-    while (cont) {
-        wxFileName fullpath(folderPath, filename);
-        // Make sure we don't add the same folder twice
-        if (wxFileName::DirExists(fullpath.GetFullPath())) {
-            // a folder
-            if (!(m_options & kShowHiddenFolders) && FileUtils::IsHidden(fullpath)) {
-                cont = dir.GetNext(&filename);
-                continue;
+        // Get the top level folders
+        wxDir dir(folderPath);
+        if (!dir.IsOpened())
+            return;
+
+        wxBusyCursor bc;
+        wxString filename;
+        bool cont = dir.GetFirst(&filename, wxEmptyString);
+        while (cont) {
+            wxFileName fullpath(folderPath, filename);
+            // Make sure we don't add the same folder twice
+            if (wxFileName::DirExists(fullpath.GetFullPath())) {
+                // a folder
+                if (!(m_options & kShowHiddenFolders) && FileUtils::IsHidden(fullpath)) {
+                    cont = dir.GetNext(&filename);
+                    continue;
+                }
+                DoAddFolder(parent, fullpath.GetFullPath());
+            } else {
+                // make sure we don't add the same file twice
+                if (!(m_options & kShowHiddenFiles) && FileUtils::IsHidden(fullpath)) {
+                    cont = dir.GetNext(&filename);
+                    continue;
+                } else if (!m_excludeFilePatterns.empty() && FileUtils::WildMatch(m_excludeFilePatterns, fullpath)) {
+                    // exclude this file?
+                    cont = dir.GetNext(&filename);
+                    continue;
+                }
+                DoAddFile(parent, fullpath.GetFullPath());
             }
-            DoAddFolder(parent, fullpath.GetFullPath());
-        } else {
-            // make sure we don't add the same file twice
-            if (!(m_options & kShowHiddenFiles) && FileUtils::IsHidden(fullpath)) {
-                cont = dir.GetNext(&filename);
-                continue;
-            } else if (!m_excludeFilePatterns.empty() && FileUtils::WildMatch(m_excludeFilePatterns, fullpath)) {
-                // exclude this file?
-                cont = dir.GetNext(&filename);
-                continue;
-            }
-            DoAddFile(parent, fullpath.GetFullPath());
+            cont = dir.GetNext(&filename);
         }
-        cont = dir.GetNext(&filename);
     }
 
     // Sort the parent
@@ -408,6 +416,10 @@ wxTreeItemId clTreeCtrlPanel::DoAddFolder(const wxTreeItemId& parent, const wxSt
     int imgOpenedIDx = clBitmaps::Get().GetLoader()->GetMimeImageId(FileExtManager::TypeFolderExpanded, isHiddenFolder);
 
     wxTreeItemId itemFolder = GetTreeCtrl()->AppendContainer(parent, displayName, imgIdx, imgOpenedIDx, cd);
+
+    // Append dummy item - this ensures that we have the + button for expanding the container item
+    clTreeCtrlData* dummy_client_data = new clTreeCtrlData(clTreeCtrlData::kDummy);
+    GetTreeCtrl()->AppendItem(itemFolder, "<dummy>", wxNOT_FOUND, wxNOT_FOUND, dummy_client_data);
 
     // use grey text for hidden items
     if (isHiddenFolder) {

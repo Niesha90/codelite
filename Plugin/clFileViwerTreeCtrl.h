@@ -63,6 +63,7 @@ class WXDLLIMPEXP_SDK clTreeCtrlData : public wxTreeItemData
 {
 public:
     enum eKind {
+        kDummy,  // Dummy node item
         kRoot,   // This item is the root (non visible) item
         kFile,   // a file
         kFolder, // a folder
@@ -124,6 +125,7 @@ public:
     // Aliases
     bool IsFolder() const { return m_kind == kFolder; }
     bool IsFile() const { return m_kind == kFile; }
+    bool IsDummy() const { return m_kind == kDummy; }
 };
 
 #include "bitmap_loader.h"
