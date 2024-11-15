@@ -110,18 +110,37 @@ void wxTreeCtrlDataViewBase::CollapseAll() { CollapseAllChildren(wxTreeItemId{ 0
 void wxTreeCtrlDataViewBase::CollapseAllChildren(const wxTreeItemId& item)
 {
     wxWindowUpdateLocker locker{ m_impl };
+
     // Go over all the items and collapse them recursively
     wxVector<wxDataViewItem> queue;
     queue.push_back(FromTreeItem(item));
+
+    wxVector<wxDataViewItem> containers;
     while (!queue.empty()) {
         auto item = queue.front();
         queue.erase(queue.begin());
-        m_impl->Collapse(item);
 
-        if (m_impl->IsContainer(item)) {
+        if (!item.IsOk() /* <- root item */ || m_impl->IsContainer(item)) {
+            containers.push_back(item);
+
             wxDataViewItemArray children;
             m_impl->GetStore()->GetChildren(item, children);
-            queue.insert(queue.end(), children.begin(), children.end());
+
+            // Only add container child
+            for (auto child : children) {
+                if (m_impl->IsContainer(child)) {
+                    queue.push_back(child);
+                    containers.push_back(child);
+                }
+            }
+        }
+    }
+
+    // Collapse all children from bottom to the top
+    auto iter = containers.rbegin();
+    for (; iter != containers.rend(); ++iter) {
+        if (m_impl->IsExpanded(*iter)) {
+            m_impl->Collapse(*iter);
         }
     }
 }
