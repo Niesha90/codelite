@@ -2,6 +2,23 @@
 
 wxIMPLEMENT_DYNAMIC_CLASS(clFileViewerTreeCtrl, wxTreeCtrl);
 
+size_t clTreeCtrlData::GetSortScore() const
+{
+    size_t score = 0;
+    if (IsFolder() || IsDummy()) {
+        score += 100;
+    }
+
+    if (!GetName().empty()) {
+        auto ch = GetName()[0];
+        if (ch == '_' || ch == '.') {
+            // Hidden file
+            score += 10;
+        }
+    }
+    return score;
+}
+
 // Default Ctor - required by wxIMPLEMENT_DYNAMIC_CLASS macro
 clFileViewerTreeCtrl::clFileViewerTreeCtrl()
     : wxTreeCtrlDataViewBase()
@@ -12,34 +29,9 @@ clFileViewerTreeCtrl::clFileViewerTreeCtrl(wxWindow* parent, wxWindowID id, cons
                                            long style)
     : wxTreeCtrlDataViewBase(parent, id, pos, size, (style | wxTR_FULL_ROW_HIGHLIGHT))
 {
-#if 0
-    std::function<bool(const wxTreeItemId&, const wxTreeItemId&)> SortFunc = [&](const wxTreeItemId& itemA,
-                                                                                 const wxTreeItemId& itemB) {
-        clTreeCtrlData* a = static_cast<clTreeCtrlData*>(GetItemData(itemA));
-        clTreeCtrlData* b = static_cast<clTreeCtrlData*>(GetItemData(itemB));
-        if(a->IsFolder() && b->IsFile())
-            return true;
-        else if(b->IsFolder() && a->IsFile())
-            return false;
-        // same kind
-        return (a->GetName().CmpNoCase(b->GetName()) < 0);
-    };
-    SetSortFunction(SortFunc);
-#endif
 }
 
 clFileViewerTreeCtrl::~clFileViewerTreeCtrl() {}
-
-//void clFileViewerTreeCtrl::SetBitmaps(BitmapLoader::Vec_t* bitmaps)
-//{
-//    // Covnert to wxVector<wxBitmapBundle>
-//    wxVector<wxBitmapBundle> images;
-//    images.reserve(bitmaps->size());
-//
-//    m_bitmaps = bitmaps;
-//    images.insert(images.begin(), m_bitmaps->begin(), m_bitmaps->end());
-//    SetImages(images);
-//}
 
 wxTreeItemId clTreeNodeIndex::Find(const wxString& path)
 {

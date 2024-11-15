@@ -2,6 +2,7 @@
 
 #include "bitmap_loader.h"
 
+#include <functional>
 #include <wx/control.h>
 #include <wx/dataview.h>
 #include <wx/treebase.h>
@@ -60,6 +61,9 @@ public:
     void SetItemText(const wxTreeItemId& item, const wxString& text);
     bool IsExpanded(const wxTreeItemId& item) const;
     void SetItemImage(const wxTreeItemId& item, int imageId);
+
+    /// Override the default sorting method
+    void SetSortFunc(std::function<int(const wxTreeItemData*, const wxTreeItemData*)> func);
 
 protected:
     void OnItemExpandingInternal(wxDataViewEvent& event);

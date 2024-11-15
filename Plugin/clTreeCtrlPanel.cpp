@@ -44,6 +44,7 @@ bool should_colour_item_in_gray(clTreeCtrlData* entry)
     }
     return false;
 }
+
 } // namespace
 
 clTreeCtrlPanel::clTreeCtrlPanel(wxWindow* parent)
@@ -51,8 +52,23 @@ clTreeCtrlPanel::clTreeCtrlPanel(wxWindow* parent)
     , m_newfileTemplate("Untitled.txt")
     , m_newfileTemplateHighlightLen(wxStrlen("Untitled"))
 {
-    ::MSWSetNativeTheme(GetTreeCtrl());
-    GetTreeCtrl()->SetFont(DrawingUtils::GetDefaultGuiFont());
+    // Sort by: folders first
+    GetTreeCtrl()->SetSortFunc([](const wxTreeItemData* a, const wxTreeItemData* b) -> int {
+        auto item1 = dynamic_cast<const clTreeCtrlData*>(a);
+        auto item2 = dynamic_cast<const clTreeCtrlData*>(b);
+
+        size_t item1_score = item1->GetSortScore();
+        size_t item2_score = item2->GetSortScore();
+
+        if (item1_score > item2_score) {
+            return -1;
+        } else if (item2_score > item1_score) {
+            return 1;
+        } else {
+            // Compare by name
+            return item1->GetName().CmpNoCase(item2->GetName());
+        }
+    });
 
     m_toolbar = new clToolBar(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_NODIVIDER | wxTB_FLAT);
     GetSizer()->Insert(0, m_toolbar, 0, wxEXPAND);

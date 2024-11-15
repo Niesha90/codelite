@@ -16,6 +16,35 @@ wxDataViewItem FromTreeItem(const wxTreeItemId& item)
     wxDataViewItem dv_item(item.m_pItem);
     return dv_item;
 }
+
+/// Create our own custom model which allows overriding the default sort
+class MyStore : public wxDataViewTreeStore
+{
+public:
+    MyStore() {}
+    virtual ~MyStore() {}
+
+    int Compare(const wxDataViewItem& item1, const wxDataViewItem& item2, unsigned int column,
+                bool ascending) const override
+    {
+        if (m_sortFunc) {
+            auto item_data1 = dynamic_cast<wxTreeItemData*>(GetItemData(item1));
+            auto item_data2 = dynamic_cast<wxTreeItemData*>(GetItemData(item2));
+            return m_sortFunc(item_data1, item_data2);
+        } else {
+            return wxDataViewTreeStore::Compare(item1, item2, column, ascending);
+        }
+    }
+
+    /// Provide a custom sorting method
+    void SetSortFunc(std::function<int(const wxTreeItemData*, const wxTreeItemData*)> func)
+    {
+        m_sortFunc = std::move(func);
+    }
+
+private:
+    std::function<int(const wxTreeItemData*, const wxTreeItemData*)> m_sortFunc = nullptr;
+};
 } // namespace
 
 wxTreeItemId wxTreeCtrlDataViewBaseCookie::Next()
@@ -31,6 +60,7 @@ wxTreeCtrlDataViewBase::wxTreeCtrlDataViewBase(wxWindow* parent, wxWindowID id, 
 {
     m_impl = new wxDataViewTreeCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
                                     wxDV_MULTIPLE | wxDV_NO_HEADER | wxDV_ROW_LINES | wxBORDER_NONE);
+    m_impl->AssociateModel(new MyStore());
 
 #if defined(__WXMSW__)
     wxColour wincolour = wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOW);
@@ -343,4 +373,10 @@ void wxTreeCtrlDataViewBase::OnItemContextMenuInternal(wxDataViewEvent& event)
     treeEvent.SetEventObject(this);
     GetEventHandler()->ProcessEvent(treeEvent);
     event.Skip();
+}
+
+void wxTreeCtrlDataViewBase::SetSortFunc(std::function<int(const wxTreeItemData*, const wxTreeItemData*)> func)
+{
+    auto store = dynamic_cast<MyStore*>(m_impl->GetStore());
+    store->SetSortFunc(std::move(func));
 }

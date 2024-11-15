@@ -23,9 +23,9 @@
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-#ifndef CLFILEVIWERTREECTRL_H
-#define CLFILEVIWERTREECTRL_H
+#pragma once
 
+#include "bitmap_loader.h"
 #include "clThemedTreeCtrl.h"
 #include "codelite_exports.h"
 #include "wxDataViewTreeCtrl.hpp"
@@ -126,9 +126,12 @@ public:
     bool IsFolder() const { return m_kind == kFolder; }
     bool IsFile() const { return m_kind == kFile; }
     bool IsDummy() const { return m_kind == kDummy; }
+
+    /// Return the item score for sorting. Each special attributes, gives this item
+    /// N score points
+    size_t GetSortScore() const;
 };
 
-#include "bitmap_loader.h"
 class WXDLLIMPEXP_SDK clFileViewerTreeCtrl : public wxTreeCtrlDataViewBase
 {
     wxDECLARE_DYNAMIC_CLASS(clFileViewerTreeCtrl);
@@ -139,11 +142,4 @@ public:
                          const wxSize& size = wxDefaultSize,
                          long style = wxTR_DEFAULT_STYLE | wxTR_MULTIPLE | wxTR_HIDE_ROOT | wxBORDER_NONE);
     virtual ~clFileViewerTreeCtrl();
-
-    // void SetBitmaps(BitmapLoader::Vec_t* bitmaps);
-
-private:
-    BitmapLoader::Vec_t* m_bitmaps = nullptr;
 };
-
-#endif // CLFILEVIWERTREECTRL_H
